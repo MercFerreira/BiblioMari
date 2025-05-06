@@ -44,29 +44,12 @@ class BibliotecaApp(ctk.CTk):
         self.load_livros()
 
     def setup_ui(self):
-        # Entradas de dados para adicionar livros
-        frame_inputs = ctk.CTkFrame(self)
-        frame_inputs.pack(pady=10, padx=10, fill="x")
-
-        self.titulo_input = ctk.CTkEntry(frame_inputs, placeholder_text="Título")
-        self.titulo_input.pack(side="left", padx=5, fill="x", expand=True)
-
-        self.autor_input = ctk.CTkEntry(frame_inputs, placeholder_text="Autor")
-        self.autor_input.pack(side="left", padx=5, fill="x", expand=True)
-
-        self.lido_check = ctk.CTkCheckBox(frame_inputs, text="Lido")
-        self.lido_check.pack(side="left", padx=5)
-
-        self.nota_input = ctk.CTkSlider(frame_inputs, from_=0, to=5, number_of_steps=5)
-        self.nota_input.pack(side="left", padx=5)
-        self.nota_input.set(0)
-
-        self.tipo_input = ctk.CTkComboBox(frame_inputs, values=["Físico", "Digital"])
-        self.tipo_input.pack(side="left", padx=5)
-        self.tipo_input.set("Físico")
-
-        self.imagem_button = ctk.CTkButton(frame_inputs, text="Selecionar Imagem", command=self.selecionar_imagem)
-        self.imagem_button.pack(side="left", padx=5)
+        # Título da aplicação
+        titulo_app = ctk.CTkLabel(self, text="The Bookshelf", font=ctk.CTkFont(size=24, weight="bold"))
+        titulo_app.pack(pady=(20, 10))
+        
+        subtitulo_app = ctk.CTkLabel(self, text="Sua biblioteca pessoal", font=ctk.CTkFont(size=14))
+        subtitulo_app.pack(pady=(0, 20))
 
         # Frame para mostrar lista de livros com scroll
         self.lista_livros_frame = ctk.CTkFrame(self)
@@ -87,53 +70,347 @@ class BibliotecaApp(ctk.CTk):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
-        # Botão de adicionar livro
+        # Botões de ação
         frame_botoes = ctk.CTkFrame(self)
-        frame_botoes.pack(pady=10)
+        frame_botoes.pack(pady=15, padx=10, fill="x")
 
-        ctk.CTkButton(frame_botoes, text="Adicionar", command=self.adicionar_livro).pack(side="left", padx=10)
-        ctk.CTkButton(frame_botoes, text="Exportar PDF", command=self.exportar_pdf).pack(side="left", padx=10)
-        ctk.CTkButton(frame_botoes, text="Exportar Excel", command=self.exportar_excel).pack(side="left", padx=10)
-        ctk.CTkButton(frame_botoes, text="Exportar Word", command=self.exportar_word).pack(side="left", padx=10)
+        # Botão de adicionar livro com ícone
+        btn_adicionar = ctk.CTkButton(
+            frame_botoes, 
+            text="Adicionar Livro", 
+            command=self.abrir_janela_adicionar,
+            height=40,
+            corner_radius=8
+        )
+        btn_adicionar.pack(side="left", padx=10, expand=True, fill="x")
 
-    def selecionar_imagem(self):
-        caminho_imagem = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
-        if caminho_imagem:
-            self.imagem_path = caminho_imagem
+        # Botões de exportação
+        frame_exportar = ctk.CTkFrame(self)
+        frame_exportar.pack(pady=(0, 15), padx=10, fill="x")
 
-    def adicionar_livro(self):
-        titulo = self.titulo_input.get()
-        autor = self.autor_input.get()
-        lido = self.lido_check.get()
-        nota = int(self.nota_input.get())
-        tipo = self.tipo_input.get()
+        ctk.CTkButton(frame_exportar, text="Exportar PDF", command=self.exportar_pdf).pack(side="left", padx=5, expand=True, fill="x")
+        ctk.CTkButton(frame_exportar, text="Exportar Excel", command=self.exportar_excel).pack(side="left", padx=5, expand=True, fill="x")
+        ctk.CTkButton(frame_exportar, text="Exportar Word", command=self.exportar_word).pack(side="left", padx=5, expand=True, fill="x")
 
-        if not titulo or not autor:
-            messagebox.showwarning("Erro", "Título e autor são obrigatórios.")
-            return
+    def abrir_janela_adicionar(self):
+        # Janela para adicionar novo livro
+        window = Toplevel(self)
+        window.title("Adicionar Novo Livro")
+        window.geometry("500x550")
+        window.grab_set()
+        
+        # Estilizar a janela
+        frame_principal = ctk.CTkFrame(window)
+        frame_principal.pack(padx=20, pady=20, fill="both", expand=True)
+        
+        # Título da janela
+        titulo_janela = ctk.CTkLabel(frame_principal, text="Adicionar Novo Livro", font=ctk.CTkFont(size=20, weight="bold"))
+        titulo_janela.pack(pady=(20, 30))
+        
+        # Campos de entrada
+        frame_campos = ctk.CTkFrame(frame_principal)
+        frame_campos.pack(padx=20, pady=10, fill="x")
+        
+        # Título
+        ctk.CTkLabel(frame_campos, text="Título:", anchor="w").pack(fill="x", pady=(10, 0))
+        titulo_input = ctk.CTkEntry(frame_campos, placeholder_text="Título do livro")
+        titulo_input.pack(fill="x", pady=(0, 10))
+        
+        # Autor
+        ctk.CTkLabel(frame_campos, text="Autor:", anchor="w").pack(fill="x", pady=(10, 0))
+        autor_input = ctk.CTkEntry(frame_campos, placeholder_text="Nome do autor")
+        autor_input.pack(fill="x", pady=(0, 10))
+        
+        # Tipo
+        ctk.CTkLabel(frame_campos, text="Tipo:", anchor="w").pack(fill="x", pady=(10, 0))
+        tipo_input = ctk.CTkComboBox(frame_campos, values=["Físico", "Digital", "E-book", "Audiobook"])
+        tipo_input.set("Físico")
+        tipo_input.pack(fill="x", pady=(0, 10))
+        
+        # Status de leitura
+        frame_lido = ctk.CTkFrame(frame_campos, fg_color="transparent")
+        frame_lido.pack(fill="x", pady=10)
+        
+        ctk.CTkLabel(frame_lido, text="Status de leitura:", anchor="w").pack(side="left")
+        lido_var = ctk.BooleanVar(value=False)
+        lido_check = ctk.CTkCheckBox(frame_lido, text="Lido", variable=lido_var)
+        lido_check.pack(side="left", padx=10)
+        
+        # Avaliação com estrelas
+        ctk.CTkLabel(frame_campos, text="Avaliação:", anchor="w").pack(fill="x", pady=(10, 5))
+        
+        frame_estrelas = ctk.CTkFrame(frame_campos, fg_color="transparent")
+        frame_estrelas.pack(fill="x", pady=(0, 10))
+        
+        nota_var = ctk.IntVar(value=0)
+        
+        # Implementaremos a lógica das estrelas em uma função separada
+        def selecionar_nota(valor):
+            nota_var.set(valor)
+            for i in range(1, 6):
+                if i <= valor:
+                    estrelas_btn[i-1].configure(text="★", font=ctk.CTkFont(size=24))
+                else:
+                    estrelas_btn[i-1].configure(text="☆", font=ctk.CTkFont(size=24))
+        
+        estrelas_btn = []
+        for i in range(1, 6):
+            btn = ctk.CTkButton(
+                frame_estrelas, 
+                text="☆", 
+                width=30, 
+                height=30, 
+                corner_radius=15,
+                font=ctk.CTkFont(size=24),
+                command=lambda v=i: selecionar_nota(v),
+                fg_color="transparent", 
+                hover_color="#e0e0e0",
+                text_color="#FFD700"
+            )
+            btn.pack(side="left", padx=2)
+            estrelas_btn.append(btn)
+            
+        # Seleção de imagem
+        ctk.CTkLabel(frame_campos, text="Imagem da capa:", anchor="w").pack(fill="x", pady=(20, 5))
+        
+        frame_imagem = ctk.CTkFrame(frame_campos)
+        frame_imagem.pack(fill="x", pady=(0, 10))
+        
+        imagem_path_var = ctk.StringVar()
+        label_imagem = ctk.CTkLabel(frame_imagem, text="Nenhuma imagem selecionada")
+        label_imagem.pack(side="left", padx=10, fill="x", expand=True)
+        
+        def selecionar_nova_imagem():
+            path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
+            if path:
+                imagem_path_var.set(path)
+                label_imagem.configure(text=os.path.basename(path))
+        
+        btn_imagem = ctk.CTkButton(frame_imagem, text="Selecionar", command=selecionar_nova_imagem)
+        btn_imagem.pack(side="right", padx=10)
+        
+        # Botões de ação
+        frame_acoes = ctk.CTkFrame(frame_principal, fg_color="transparent")
+        frame_acoes.pack(pady=20, fill="x")
+        
+        def salvar_livro():
+            titulo = titulo_input.get()
+            autor = autor_input.get()
+            
+            if not titulo or not autor:
+                messagebox.showwarning("Erro", "Título e autor são obrigatórios.")
+                return
+                
+            livro = Livro(
+                titulo=titulo,
+                autor=autor,
+                lido=lido_var.get(),
+                nota=nota_var.get(),
+                tipo=tipo_input.get(),
+                imagem_path=imagem_path_var.get() if imagem_path_var.get() else None
+            )
+            
+            self.livros.append(livro)
+            self.salvar_livros()
+            self.atualizar_lista()
+            window.destroy()
+        
+        btn_cancelar = ctk.CTkButton(
+            frame_acoes, 
+            text="Cancelar", 
+            fg_color="#f0f0f0", 
+            text_color="black",
+            hover_color="#e0e0e0",
+            command=window.destroy
+        )
+        btn_cancelar.pack(side="left", padx=20, expand=True, fill="x")
+        
+        btn_salvar = ctk.CTkButton(
+            frame_acoes, 
+            text="Salvar", 
+            command=salvar_livro
+        )
+        btn_salvar.pack(side="left", padx=20, expand=True, fill="x")
 
-        livro = Livro(titulo, autor, lido, nota, tipo, self.imagem_path)
-        self.livros.append(livro)
-        self.salvar_livros()
-        self.atualizar_lista()
-        self.limpar_inputs()
+    def abrir_edicao(self, index):
+        livro = self.livros[index]
 
-    def limpar_inputs(self):
-        self.titulo_input.delete(0, "end")
-        self.autor_input.delete(0, "end")
-        self.lido_check.deselect()
-        self.nota_input.set(0)
-        self.tipo_input.set("Físico")
-        self.imagem_path = None
+        # Janela de edição
+        window = Toplevel(self)
+        window.title(f"Editar livro: {livro.titulo}")
+        window.geometry("500x550")
+        window.grab_set()
+        
+        # Estilizar a janela
+        frame_principal = ctk.CTkFrame(window)
+        frame_principal.pack(padx=20, pady=20, fill="both", expand=True)
+        
+        # Título da janela
+        titulo_janela = ctk.CTkLabel(frame_principal, text=f"Editar Livro", font=ctk.CTkFont(size=20, weight="bold"))
+        titulo_janela.pack(pady=(20, 30))
+        
+        # Campos de entrada
+        frame_campos = ctk.CTkFrame(frame_principal)
+        frame_campos.pack(padx=20, pady=10, fill="x")
+        
+        # Título
+        ctk.CTkLabel(frame_campos, text="Título:", anchor="w").pack(fill="x", pady=(10, 0))
+        titulo_input = ctk.CTkEntry(frame_campos, placeholder_text="Título do livro")
+        titulo_input.insert(0, livro.titulo)
+        titulo_input.pack(fill="x", pady=(0, 10))
+        
+        # Autor
+        ctk.CTkLabel(frame_campos, text="Autor:", anchor="w").pack(fill="x", pady=(10, 0))
+        autor_input = ctk.CTkEntry(frame_campos, placeholder_text="Nome do autor")
+        autor_input.insert(0, livro.autor)
+        autor_input.pack(fill="x", pady=(0, 10))
+        
+        # Tipo
+        ctk.CTkLabel(frame_campos, text="Tipo:", anchor="w").pack(fill="x", pady=(10, 0))
+        tipo_input = ctk.CTkComboBox(frame_campos, values=["Físico", "Digital", "E-book", "Audiobook"])
+        tipo_input.set(livro.tipo)
+        tipo_input.pack(fill="x", pady=(0, 10))
+        
+        # Status de leitura
+        frame_lido = ctk.CTkFrame(frame_campos, fg_color="transparent")
+        frame_lido.pack(fill="x", pady=10)
+        
+        ctk.CTkLabel(frame_lido, text="Status de leitura:", anchor="w").pack(side="left")
+        lido_var = ctk.BooleanVar(value=livro.lido)
+        lido_check = ctk.CTkCheckBox(frame_lido, text="Lido", variable=lido_var)
+        lido_check.pack(side="left", padx=10)
+        
+        # Avaliação com estrelas
+        ctk.CTkLabel(frame_campos, text="Avaliação:", anchor="w").pack(fill="x", pady=(10, 5))
+        
+        frame_estrelas = ctk.CTkFrame(frame_campos, fg_color="transparent")
+        frame_estrelas.pack(fill="x", pady=(0, 10))
+        
+        nota_var = ctk.IntVar(value=livro.nota)
+        
+        # Implementaremos a lógica das estrelas em uma função separada
+        def selecionar_nota(valor):
+            nota_var.set(valor)
+            for i in range(1, 6):
+                if i <= valor:
+                    estrelas_btn[i-1].configure(text="★", font=ctk.CTkFont(size=24))
+                else:
+                    estrelas_btn[i-1].configure(text="☆", font=ctk.CTkFont(size=24))
+        
+        estrelas_btn = []
+        for i in range(1, 6):
+            btn = ctk.CTkButton(
+                frame_estrelas, 
+                text="☆" if i > livro.nota else "★", 
+                width=30, 
+                height=30, 
+                corner_radius=15,
+                font=ctk.CTkFont(size=24),
+                command=lambda v=i: selecionar_nota(v),
+                fg_color="transparent", 
+                hover_color="#e0e0e0",
+                text_color="#FFD700"
+            )
+            btn.pack(side="left", padx=2)
+            estrelas_btn.append(btn)
+            
+        # Seleção de imagem
+        ctk.CTkLabel(frame_campos, text="Imagem da capa:", anchor="w").pack(fill="x", pady=(20, 5))
+        
+        frame_imagem = ctk.CTkFrame(frame_campos)
+        frame_imagem.pack(fill="x", pady=(0, 10))
+        
+        imagem_path_var = ctk.StringVar(value=livro.imagem_path if livro.imagem_path else "")
+        label_imagem = ctk.CTkLabel(
+            frame_imagem, 
+            text=os.path.basename(imagem_path_var.get()) if imagem_path_var.get() else "Nenhuma imagem selecionada"
+        )
+        label_imagem.pack(side="left", padx=10, fill="x", expand=True)
+        
+        def selecionar_nova_imagem():
+            path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
+            if path:
+                imagem_path_var.set(path)
+                label_imagem.configure(text=os.path.basename(path))
+        
+        btn_imagem = ctk.CTkButton(frame_imagem, text="Selecionar", command=selecionar_nova_imagem)
+        btn_imagem.pack(side="right", padx=10)
+        
+        # Botões de ação
+        frame_acoes = ctk.CTkFrame(frame_principal, fg_color="transparent")
+        frame_acoes.pack(pady=20, fill="x")
+        
+        def salvar_modificacoes():
+            livro.titulo = titulo_input.get()
+            livro.autor = autor_input.get()
+            livro.lido = lido_var.get()
+            livro.nota = nota_var.get()
+            livro.tipo = tipo_input.get()
+            livro.imagem_path = imagem_path_var.get() if imagem_path_var.get() else None
+            self.salvar_livros()
+            self.atualizar_lista()
+            window.destroy()
+        
+        def excluir_livro():
+            resposta = messagebox.askyesno("Confirmar Exclusão", f"Deseja realmente excluir o livro '{livro.titulo}'?")
+            if resposta:
+                del self.livros[index]
+                self.salvar_livros()
+                self.atualizar_lista()
+                window.destroy()
+        
+        frame_botoes = ctk.CTkFrame(frame_acoes, fg_color="transparent")
+        frame_botoes.pack(side="left", expand=True, fill="x")
+        
+        btn_cancelar = ctk.CTkButton(
+            frame_botoes, 
+            text="Cancelar", 
+            fg_color="#f0f0f0", 
+            text_color="black",
+            hover_color="#e0e0e0",
+            command=window.destroy
+        )
+        btn_cancelar.pack(side="left", padx=5, expand=True, fill="x")
+        
+        btn_salvar = ctk.CTkButton(
+            frame_botoes, 
+            text="Salvar", 
+            command=salvar_modificacoes
+        )
+        btn_salvar.pack(side="left", padx=5, expand=True, fill="x")
+        
+        # Botão de excluir separado
+        btn_excluir = ctk.CTkButton(
+            frame_acoes, 
+            text="Excluir Livro", 
+            fg_color="#FF5555", 
+            hover_color="#FF0000",
+            command=excluir_livro
+        )
+        btn_excluir.pack(side="right", padx=20)
 
     def atualizar_lista(self):
         for widget in self.scrollable_frame.winfo_children():
             widget.destroy()
         self.imagem_refs.clear()
 
+        if not self.livros:
+            # Mensagem quando não há livros
+            msg_frame = ctk.CTkFrame(self.scrollable_frame, fg_color="transparent")
+            msg_frame.pack(fill="both", expand=True, padx=20, pady=50)
+            
+            msg = ctk.CTkLabel(
+                msg_frame, 
+                text="Sua biblioteca está vazia.\nClique em 'Adicionar Livro' para começar!",
+                font=ctk.CTkFont(size=16),
+                justify="center"
+            )
+            msg.pack(pady=50)
+            return
+
         for idx, livro in enumerate(self.livros):
-            frame_item = ctk.CTkFrame(self.scrollable_frame, corner_radius=8)
-            frame_item.pack(fill="x", padx=5, pady=5)
+            frame_item = ctk.CTkFrame(self.scrollable_frame, corner_radius=10)
+            frame_item.pack(fill="x", padx=10, pady=8)
 
             # Imagem do livro (thumbnail)
             if livro.imagem_path and os.path.exists(livro.imagem_path):
@@ -161,81 +438,27 @@ class BibliotecaApp(ctk.CTk):
 
             label_autor = ctk.CTkLabel(texto_frame, text=f"Autor: {livro.autor}", font=ctk.CTkFont(size=12), anchor="w")
             label_autor.pack(fill="x", pady=(4, 0))
+            
+            # Exibir estrelas para a nota
+            estrelas_frame = ctk.CTkFrame(texto_frame, fg_color="transparent")
+            estrelas_frame.pack(fill="x", pady=(4, 0))
+            
+            nota_texto = "".join(["★" if i < livro.nota else "☆" for i in range(5)])
+            label_estrelas = ctk.CTkLabel(
+                estrelas_frame, 
+                text=nota_texto, 
+                font=ctk.CTkFont(size=14),
+                text_color="#FFD700",
+                anchor="w"
+            )
+            label_estrelas.pack(side="left")
 
-            label_status = ctk.CTkLabel(texto_frame, text=f"Lido: {'✔️' if livro.lido else '❌'} | Nota: {livro.nota} | Tipo: {livro.tipo}", font=ctk.CTkFont(size=12), anchor="w")
+            label_status = ctk.CTkLabel(texto_frame, text=f"Lido: {'✔️' if livro.lido else '❌'} | Tipo: {livro.tipo}", font=ctk.CTkFont(size=12), anchor="w")
             label_status.pack(fill="x", pady=(4, 0))
 
             # Botão Editar no canto direito
             btn_editar = ctk.CTkButton(frame_item, text="Editar", width=60, command=lambda i=idx: self.abrir_edicao(i))
             btn_editar.pack(side="right", padx=10, pady=10)
-
-    def abrir_edicao(self, index):
-        livro = self.livros[index]
-
-        # Janela de edição
-        window = Toplevel(self)
-        window.title(f"Editar livro: {livro.titulo}")
-        window.geometry("400x400")
-        window.grab_set()
-
-        # Entradas para edição
-        titulo_input = ctk.CTkEntry(window)
-        titulo_input.insert(0, livro.titulo)
-        titulo_input.pack(padx=10, pady=5, fill="x")
-
-        autor_input = ctk.CTkEntry(window)
-        autor_input.insert(0, livro.autor)
-        autor_input.pack(padx=10, pady=5, fill="x")
-
-        lido_var = ctk.BooleanVar(value=livro.lido)
-        lido_check = ctk.CTkCheckBox(window, text="Lido", variable=lido_var)
-        lido_check.pack(padx=10, pady=5)
-
-        nota_slider = ctk.CTkSlider(window, from_=0, to=5, number_of_steps=5)
-        nota_slider.set(livro.nota)
-        nota_slider.pack(padx=10, pady=5, fill="x")
-
-        tipo_combo = ctk.CTkComboBox(window, values=["Físico", "Digital"])
-        tipo_combo.set(livro.tipo)
-        tipo_combo.pack(padx=10, pady=5)
-
-        imagem_path_var = ctk.StringVar(value=livro.imagem_path if livro.imagem_path else "")
-
-        def selecionar_nova_imagem():
-            path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
-            if path:
-                imagem_path_var.set(path)
-                label_imagem.config(text=os.path.basename(path))
-
-        ctk.CTkButton(window, text="Selecionar Nova Imagem", command=selecionar_nova_imagem).pack(padx=10, pady=5)
-        label_imagem = ctk.CTkLabel(window, text=os.path.basename(imagem_path_var.get()) if imagem_path_var.get() else "Nenhuma imagem selecionada")
-        label_imagem.pack(padx=10, pady=5)
-
-        def salvar_modificacoes():
-            livro.titulo = titulo_input.get()
-            livro.autor = autor_input.get()
-            livro.lido = lido_var.get()
-            livro.nota = int(nota_slider.get())
-            livro.tipo = tipo_combo.get()
-            livro.imagem_path = imagem_path_var.get() if imagem_path_var.get() else None
-            self.salvar_livros()
-            self.atualizar_lista()
-            window.destroy()
-
-        btn_salvar = ctk.CTkButton(window, text="Salvar", command=salvar_modificacoes)
-        btn_salvar.pack(padx=10, pady=15)
-
-        def excluir_livro():
-            resposta = messagebox.askyesno("Confirmar Exclusão", f"Deseja realmente excluir o livro '{livro.titulo}'?")
-            if resposta:
-                del self.livros[index]
-                self.salvar_livros()
-                self.atualizar_lista()
-                window.destroy()
-
-        btn_excluir = ctk.CTkButton(window, text="Excluir", fg_color="red", hover_color="#cc0000", command=excluir_livro)
-        btn_excluir.pack(padx=10, pady=5)
-
 
     def salvar_livros(self):
         with open("biblioteca.json", "w", encoding="utf-8") as f:
