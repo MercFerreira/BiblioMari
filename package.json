@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "yet": "^0.1.0"
+  },
+  "scripts": {
+    "start": "cd BiblioMariExpo && npm run start",
+    "start:port": "cd BiblioMariExpo && npm run start:port"
+  }
+}
