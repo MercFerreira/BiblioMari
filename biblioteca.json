@@ -1,10 +1,10 @@
 [
   {
-    "titulo": "Teste ",
-    "autor": "Cleyton Jeredy",
-    "lido": true,
+    "titulo": "VanderGay",
+    "autor": "Batman",
+    "status_leitura": "Lendo",
     "nota": 3,
-    "tipo": "Físico",
+    "tipo": "Audiobook",
     "imagem_path": "C:/Users/Marcos Ferreira/Documents/temp_pdf_img.jpg"
   }
 ]

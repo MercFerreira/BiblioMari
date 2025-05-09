@@ -8,8 +8,20 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PIL import Image
 
+# Definindo cores personalizadas em tons de lilás pastel
+CORES = {
+    "primaria": "#D8BFD8",  # Lilás pastel claro
+    "secundaria": "#E6E6FA",  # Lavanda muito claro
+    "terciaria": "#C9A0DC",  # Lilás médio
+    "texto": "#4B0082",  # Índigo (para texto)
+    "botao": "#9370DB",  # Lilás médio para botões
+    "botao_hover": "#8A2BE2",  # Violeta para hover
+    "estrela": "#9932CC",  # Orquídea escura para estrelas
+    "fundo": "#F8F4FF"  # Fundo muito claro com tom lilás
+}
+
 ctk.set_appearance_mode("light")
-ctk.set_default_color_theme("blue")
+ctk.set_default_color_theme("blue")  # Mantemos o tema base, mas vamos sobrescrever as cores
 
 
 class Livro:
@@ -35,29 +47,137 @@ class Livro:
 class BibliotecaApp(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Minha Biblioteca")
-        self.geometry("700x600")
+        self.title("The Bookshelf")
+        self.geometry("800x650")
+        self.configure(fg_color=CORES["fundo"])  # Cor de fundo personalizada
         self.livros = []
         self.imagem_path = None
         self.imagem_refs = {}  # Para manter referência das imagens exibidas na lista
+        
+        # Configurar ícone da aplicação se disponível
+        try:
+            self.iconbitmap("bookshelf_icon.ico")
+        except:
+            pass  # Ignora se o ícone não existir
+            
         self.setup_ui()
         self.load_livros()
 
     def setup_ui(self):
-        # Título da aplicação
-        titulo_app = ctk.CTkLabel(self, text="The Bookshelf", font=ctk.CTkFont(size=24, weight="bold"))
-        titulo_app.pack(pady=(20, 10))
+        # Cabeçalho com título e subtítulo
+        header_frame = ctk.CTkFrame(self, fg_color=CORES["primaria"], corner_radius=0)
+        header_frame.pack(fill="x", pady=(0, 20))
         
-        subtitulo_app = ctk.CTkLabel(self, text="Sua biblioteca pessoal", font=ctk.CTkFont(size=14))
+        # Título da aplicação
+        titulo_app = ctk.CTkLabel(
+            header_frame, 
+            text="The Bookshelf", 
+            font=ctk.CTkFont(size=28, weight="bold"),
+            text_color=CORES["texto"]
+        )
+        titulo_app.pack(pady=(20, 5))
+        
+        subtitulo_app = ctk.CTkLabel(
+            header_frame, 
+            text="Sua biblioteca pessoal", 
+            font=ctk.CTkFont(size=16),
+            text_color=CORES["texto"]
+        )
         subtitulo_app.pack(pady=(0, 20))
 
+        # Área principal com barra lateral e conteúdo
+        main_frame = ctk.CTkFrame(self, fg_color="transparent")
+        main_frame.pack(padx=15, pady=10, fill="both", expand=True)
+        
+        # Barra lateral com botões de ação
+        sidebar_frame = ctk.CTkFrame(main_frame, fg_color=CORES["secundaria"], width=180)
+        sidebar_frame.pack(side="left", fill="y", padx=(0, 15), pady=5)
+        sidebar_frame.pack_propagate(False)  # Impede que o frame encolha
+        
+        # Título da barra lateral
+        sidebar_title = ctk.CTkLabel(
+            sidebar_frame, 
+            text="Ações", 
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=CORES["texto"]
+        )
+        sidebar_title.pack(pady=(20, 15))
+        
+        # Botão de adicionar livro
+        btn_adicionar = ctk.CTkButton(
+            sidebar_frame, 
+            text="Adicionar Livro", 
+            command=self.abrir_janela_adicionar,
+            height=40,
+            corner_radius=8,
+            fg_color=CORES["botao"],
+            hover_color=CORES["botao_hover"],
+            text_color="white",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        btn_adicionar.pack(padx=15, pady=10, fill="x")
+        
+        # Separador
+        separator = ctk.CTkFrame(sidebar_frame, height=1, fg_color=CORES["terciaria"])
+        separator.pack(fill="x", padx=15, pady=15)
+        
+        # Título da seção de exportação
+        export_title = ctk.CTkLabel(
+            sidebar_frame, 
+            text="Exportar", 
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color=CORES["texto"]
+        )
+        export_title.pack(pady=(5, 10))
+        
+        # Botões de exportação
+        ctk.CTkButton(
+            sidebar_frame, 
+            text="Exportar PDF", 
+            command=self.exportar_pdf,
+            fg_color=CORES["botao"],
+            hover_color=CORES["botao_hover"],
+            text_color="white"
+        ).pack(padx=15, pady=5, fill="x")
+        
+        ctk.CTkButton(
+            sidebar_frame, 
+            text="Exportar Excel", 
+            command=self.exportar_excel,
+            fg_color=CORES["botao"],
+            hover_color=CORES["botao_hover"],
+            text_color="white"
+        ).pack(padx=15, pady=5, fill="x")
+        
+        ctk.CTkButton(
+            sidebar_frame, 
+            text="Exportar Word", 
+            command=self.exportar_word,
+            fg_color=CORES["botao"],
+            hover_color=CORES["botao_hover"],
+            text_color="white"
+        ).pack(padx=15, pady=5, fill="x")
+
         # Frame para mostrar lista de livros com scroll
-        self.lista_livros_frame = ctk.CTkFrame(self)
+        content_frame = ctk.CTkFrame(main_frame, fg_color=CORES["secundaria"])
+        content_frame.pack(side="right", fill="both", expand=True, pady=5)
+        
+        # Título da lista de livros
+        list_title = ctk.CTkLabel(
+            content_frame, 
+            text="Meus Livros", 
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=CORES["texto"]
+        )
+        list_title.pack(pady=(15, 10))
+        
+        # Frame para a lista com scroll
+        self.lista_livros_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
         self.lista_livros_frame.pack(padx=10, pady=10, fill="both", expand=True)
 
-        self.canvas = ctk.CTkCanvas(self.lista_livros_frame, borderwidth=0, highlightthickness=0)
+        self.canvas = ctk.CTkCanvas(self.lista_livros_frame, borderwidth=0, highlightthickness=0, bg=CORES["secundaria"])
         self.scrollbar = ctk.CTkScrollbar(self.lista_livros_frame, orientation="vertical", command=self.canvas.yview)
-        self.scrollable_frame = ctk.CTkFrame(self.canvas)
+        self.scrollable_frame = ctk.CTkFrame(self.canvas, fg_color="transparent")
 
         self.scrollable_frame.bind(
             "<Configure>",
@@ -70,42 +190,30 @@ class BibliotecaApp(ctk.CTk):
         self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar.pack(side="right", fill="y")
 
-        # Botões de ação
-        frame_botoes = ctk.CTkFrame(self)
-        frame_botoes.pack(pady=15, padx=10, fill="x")
-
-        # Botão de adicionar livro com ícone
-        btn_adicionar = ctk.CTkButton(
-            frame_botoes, 
-            text="Adicionar Livro", 
-            command=self.abrir_janela_adicionar,
-            height=40,
-            corner_radius=8
-        )
-        btn_adicionar.pack(side="left", padx=10, expand=True, fill="x")
-
-        # Botões de exportação
-        frame_exportar = ctk.CTkFrame(self)
-        frame_exportar.pack(pady=(0, 15), padx=10, fill="x")
-
-        ctk.CTkButton(frame_exportar, text="Exportar PDF", command=self.exportar_pdf).pack(side="left", padx=5, expand=True, fill="x")
-        ctk.CTkButton(frame_exportar, text="Exportar Excel", command=self.exportar_excel).pack(side="left", padx=5, expand=True, fill="x")
-        ctk.CTkButton(frame_exportar, text="Exportar Word", command=self.exportar_word).pack(side="left", padx=5, expand=True, fill="x")
-
     def abrir_janela_adicionar(self):
         # Janela para adicionar novo livro
         window = Toplevel(self)
         window.title("Adicionar Novo Livro")
-        window.geometry("700x450")
+        window.geometry("700x500")
         window.grab_set()
         
         # Estilizar a janela
-        frame_principal = ctk.CTkFrame(window)
-        frame_principal.pack(padx=20, pady=20, fill="both", expand=True)
+        frame_principal = ctk.CTkFrame(window, fg_color=CORES["fundo"])
+        frame_principal.pack(padx=0, pady=0, fill="both", expand=True)
+        
+        # Cabeçalho com título
+        header_frame = ctk.CTkFrame(frame_principal, fg_color=CORES["primaria"], corner_radius=0, height=80)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)  # Mantém a altura fixa
         
         # Título da janela
-        titulo_janela = ctk.CTkLabel(frame_principal, text="Adicionar Novo Livro", font=ctk.CTkFont(size=20, weight="bold"))
-        titulo_janela.pack(pady=(10, 20))
+        titulo_janela = ctk.CTkLabel(
+            header_frame, 
+            text="Adicionar Novo Livro", 
+            font=ctk.CTkFont(size=22, weight="bold"),
+            text_color=CORES["texto"]
+        )
+        titulo_janela.pack(pady=25)
         
         # Layout em duas colunas
         frame_conteudo = ctk.CTkFrame(frame_principal)
